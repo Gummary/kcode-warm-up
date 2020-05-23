@@ -27,10 +27,6 @@ public class Producer implements Runnable{
         int bufferRemain = BUFFERSIZE-offset;
         try {
             char[] buffer = new char[BUFFERSIZE];
-//            String line;
-//            while((line = this.bufferedReader.readLine())!=null) {
-//                System.out.println(line);
-//            }
             while(this.bufferedReader.read(buffer, offset, bufferRemain) > 0) {
                 char[] tmpbuffer;
                 int last_index = BUFFERSIZE - 1;
