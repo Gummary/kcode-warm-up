@@ -17,6 +17,24 @@ public class Consumer implements Runnable{
         this.signal = signal;
     }
 
+    private int binarySearch(ArrayList<Integer> list, Integer value) {
+        int low = 0;
+        int high = list.size() - 1;
+
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            Integer midVal = list.get(mid);
+            int cmp = midVal.compareTo(value);
+            if (cmp < 0) {
+                low = mid + 1;
+            } else if (cmp > 0) {
+                high = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+        return low;
+    }
 
     @Override
     public void run() {
@@ -34,21 +52,16 @@ public class Consumer implements Runnable{
                         String methodName = s[1];
                         int responseTime = Integer.parseInt(s[2]);
 
-                        if (this.concurrentHashMap.containsKey(methodName)) {
-                            concurrentHashMap.computeIfPresent(methodName, (key, value) ->
-                                                {
-                                                    ArrayList<Integer> l =  value.getOrDefault(time, new ArrayList<>());
-                                                    l.add(responseTime);
-                                                    value.put(time, l);
-                                                    return value;
-                                                });
-                        } else {
-                            HashMap<Long, ArrayList<Integer>> logs = new HashMap<>();
-                            ArrayList<Integer> responseTimes = new ArrayList<>();
-                            responseTimes.add(responseTime);
-                            logs.put(time, responseTimes);
-                            concurrentHashMap.put(methodName, logs);
-                        }
+                        concurrentHashMap.compute(methodName, (key, value)->{
+                                if (value == null) {
+                                    value = new HashMap<>();
+                                }
+                                ArrayList<Integer> l =  value.getOrDefault(time, new ArrayList<>());
+                                int pos = this.binarySearch(l, responseTime);
+                                l.add(pos, responseTime);
+                                value.put(time, l);
+                                return value;
+                            });
                         stringBuilder.setLength(0);
                     } else {
                         stringBuilder.append(c);

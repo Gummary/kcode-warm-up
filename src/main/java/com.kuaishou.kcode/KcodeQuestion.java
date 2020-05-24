@@ -48,6 +48,11 @@ public class KcodeQuestion {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+//        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
+//        this.logMap.entrySet()){
+//            System.out.println(entry.getKey().length());
+//        }
+//        System.out.println(this.logMap.size());
     }
 
     /**
@@ -63,7 +68,7 @@ public class KcodeQuestion {
         ArrayList<Integer> responseTimes = logs.get(timestamp);
 
         int qps = responseTimes.size();
-        Collections.sort(responseTimes);
+//        Collections.sort(responseTimes);
         int sum = 0;
         for (Integer responseTime:
              responseTimes) {
@@ -105,11 +110,11 @@ public class KcodeQuestion {
         int avg = (int) Math.ceil((double)sum / (double) responseTimes.size());
         int max = responseTimes.get(responseTimes.size()-1);
 
-        String info = "P50 index: " + p50_idx + ","
-                + "P50: " + responseTimes.get(p50_idx) + ","
-                + "P50 index-1: " + responseTimes.get(p50_idx-1) + ","
-                + "P50 index+1: " + responseTimes.get(p50_idx+1) + ",";
-        System.out.println(info);
+//        String info = "P50 index: " + p50_idx + ","
+//                + "P50: " + responseTimes.get(p50_idx) + ","
+//                + "P50 index-1: " + responseTimes.get(p50_idx-1) + ","
+//                + "P50 index+1: " + responseTimes.get(p50_idx+1) + ",";
+//        System.out.println(info);
     }
 
 }
