@@ -16,11 +16,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KcodeQuestion {
 
-    private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
+    private final ConcurrentHashMap<String, ArrayList<Integer>> logMap;
     private static final int NUM_THREAD = 17;
 
     public KcodeQuestion() {
-        logMap = new ConcurrentHashMap<>(64);
+        logMap = new ConcurrentHashMap<>(2<<18);
     }
 
     /**
@@ -29,7 +29,7 @@ public class KcodeQuestion {
      * @param inputStream
      */
     public void prepare(InputStream inputStream) {
-        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<char[]>(NUM_THREAD);
+        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
         Signal signal = new Signal();
         Thread producer = new Thread(new Producer(inputStream, queue, signal));
         producer.start();
@@ -48,11 +48,6 @@ public class KcodeQuestion {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
-        this.logMap.entrySet()){
-            System.out.println(entry.getValue().keySet().size());
-        }
-//        System.out.println(this.logMap.size());
     }
 
     /**
@@ -64,8 +59,10 @@ public class KcodeQuestion {
      */
     public String getResult(Long timestamp, String methodName) {
         // do something
-        HashMap<Long, ArrayList<Integer>> logs = this.logMap.get(methodName);
-        ArrayList<Integer> responseTimes = logs.get(timestamp);
+        String _timestamp = timestamp.toString();
+        _timestamp = _timestamp.substring(0, _timestamp.length()-3);
+        String queykey = methodName+_timestamp;
+        ArrayList<Integer> responseTimes = this.logMap.get(queykey);
 
         int qps = responseTimes.size();
 //        Collections.sort(responseTimes);
@@ -93,8 +90,10 @@ public class KcodeQuestion {
     }
     public void debugGetResult(Long timestamp, String methodName) {
         // do something
-        HashMap<Long, ArrayList<Integer>> logs = this.logMap.get(methodName);
-        ArrayList<Integer> responseTimes = logs.get(timestamp);
+        String _timestamp = timestamp.toString();
+        _timestamp = _timestamp.substring(0, _timestamp.length()-3);
+        String queykey = methodName+_timestamp;
+        ArrayList<Integer> responseTimes = this.logMap.get(queykey);
 
         int qps = responseTimes.size();
         Collections.sort(responseTimes);

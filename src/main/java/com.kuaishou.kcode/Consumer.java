@@ -8,10 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Consumer implements Runnable{
 
     private final ArrayBlockingQueue<char []> blockingQueue;
-    private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> concurrentHashMap;
+    private final ConcurrentHashMap<String, ArrayList<Integer>> concurrentHashMap;
     private final Signal signal;
 
-    public Consumer(ArrayBlockingQueue<char[]> queue, ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> map, Signal signal) {
+    public Consumer(ArrayBlockingQueue<char[]> queue, ConcurrentHashMap<String, ArrayList<Integer>> map, Signal signal) {
         this.blockingQueue = queue;
         this.concurrentHashMap = map;
         this.signal = signal;
@@ -48,18 +48,16 @@ public class Consumer implements Runnable{
                         break;
                     } else if (c == '\n') {
                         String[] s = stringBuilder.toString().split(",");
-                        long time = Long.parseLong(s[0].substring(0, s[0].length()-3));
+                        s[0] = s[0].substring(0, s[0].length()-3);
                         String methodName = s[1];
                         int responseTime = Integer.parseInt(s[2]);
-
-                        concurrentHashMap.compute(methodName, (key, value)->{
+                        String queryKey = methodName + s[0];
+                        concurrentHashMap.compute(queryKey, (key, value)->{
                                 if (value == null) {
-                                    value = new HashMap<>();
+                                    value = new ArrayList<>();
                                 }
-                                ArrayList<Integer> l =  value.getOrDefault(time, new ArrayList<>());
-                                int pos = this.binarySearch(l, responseTime);
-                                l.add(pos, responseTime);
-                                value.put(time, l);
+                                int pos = this.binarySearch(value, responseTime);
+                                value.add(pos, responseTime);
                                 return value;
                             });
                         stringBuilder.setLength(0);
