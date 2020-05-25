@@ -59,9 +59,7 @@ public class KcodeQuestion {
      */
     public String getResult(Long timestamp, String methodName) {
         // do something
-        String _timestamp = timestamp.toString();
-        _timestamp = _timestamp.substring(0, _timestamp.length()-3);
-        String queykey = methodName+_timestamp;
+        String queykey = methodName + timestamp;
         ArrayList<Integer> responseTimes = this.logMap.get(queykey);
 
         int qps = responseTimes.size();
@@ -89,11 +87,8 @@ public class KcodeQuestion {
                 max;
     }
     public void debugGetResult(Long timestamp, String methodName) {
-        // do something
-        String _timestamp = timestamp.toString();
-        _timestamp = _timestamp.substring(0, _timestamp.length()-3);
-        String queykey = methodName+_timestamp;
-        ArrayList<Integer> responseTimes = this.logMap.get(queykey);
+        String queryKey = methodName+timestamp;
+        ArrayList<Integer> responseTimes = this.logMap.get(queryKey);
 
         int qps = responseTimes.size();
         Collections.sort(responseTimes);
