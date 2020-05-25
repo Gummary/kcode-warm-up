@@ -48,10 +48,10 @@ public class KcodeQuestion {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-//        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
-//        this.logMap.entrySet()){
-//            System.out.println(entry.getKey().length());
-//        }
+        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
+        this.logMap.entrySet()){
+            System.out.println(entry.getValue().keySet().size());
+        }
 //        System.out.println(this.logMap.size());
     }
 
