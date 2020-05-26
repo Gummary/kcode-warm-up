@@ -20,7 +20,7 @@ public class KcodeQuestion {
     private static final int NUM_THREAD = 17;
 
     public KcodeQuestion() {
-        logMap = new ConcurrentHashMap<>(2<<18);
+        logMap = new ConcurrentHashMap<>(2<<21);
     }
 
     /**
