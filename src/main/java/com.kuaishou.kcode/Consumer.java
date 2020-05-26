@@ -40,18 +40,28 @@ public class Consumer implements Runnable{
     public void run() {
         while (true) {
             char[] data = blockingQueue.poll();
+
             if (data != null)  {
-                StringBuilder stringBuilder = new StringBuilder();
-                for (char c :
-                        data) {
-                    if (c == '\0') {
+                int dataLength = data.length;
+                int startMessageIdx = 0;
+                int secondDotIdx = 0;
+
+                for (int i = 0; i < dataLength; i++) {
+                    if (data[i] == '\0') {
                         break;
-                    } else if (c == '\n') {
-                        String[] s = stringBuilder.toString().split(",");
-                        s[0] = s[0].substring(0, s[0].length()-3);
-                        String methodName = s[1];
-                        int responseTime = Integer.parseInt(s[2]);
-                        String queryKey = methodName + s[0];
+                    } else if (data[i] == '\n') {
+                        String timestamp = new String(data, startMessageIdx,10);
+                        for(int  j = i;j > startMessageIdx; j--){
+                            if(data[j] ==','){
+                                secondDotIdx = j;
+                                break;
+                            }
+                        }
+                        String methodName = new String(data, startMessageIdx + 14, secondDotIdx - startMessageIdx - 14);
+
+                        int responseTime = Integer.parseInt(new String(data, secondDotIdx + 1, i - secondDotIdx - 1));
+                        String queryKey = methodName + timestamp;
+                        startMessageIdx = i+1;
                         concurrentHashMap.compute(queryKey, (key, value)->{
                                 if (value == null) {
                                     value = new ArrayList<>();
@@ -60,9 +70,6 @@ public class Consumer implements Runnable{
                                 value.add(pos, responseTime);
                                 return value;
                             });
-                        stringBuilder.setLength(0);
-                    } else {
-                        stringBuilder.append(c);
                     }
                 }
             }
