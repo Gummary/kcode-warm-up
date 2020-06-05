@@ -67,7 +67,7 @@ public class Consumer implements Runnable{
                             if (value == null) {
                                 value = new HashMap<>();
                             }
-                            ArrayList<Integer> l =  value.getOrDefault(timestamp, new ArrayList<>());
+                            ArrayList<Integer> l =  value.getOrDefault(timestamp, new ArrayList<>(2<<20));
                             int pos = this.binarySearch(l, responseTime);
                             l.add(pos, responseTime);
                             value.put(timestamp, l);
