@@ -17,13 +17,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KcodeQuestion {
 
     private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
-    private static final int NUM_THREAD = 17;
+    private static final int NUM_THREAD = 2;
 
 
     public KcodeQuestion() {
         logMap = new ConcurrentHashMap<>(2<<7);
     }
 
+
+//    日志的时间戳是顺序排列的，如何利用这个特点加速
     /**
      * prepare() 方法用来接受输入数据集，数据集格式参考README.md
      *
@@ -49,10 +51,13 @@ public class KcodeQuestion {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-//        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
-//        this.logMap.entrySet()){
-//            System.out.println(entry.getKey().length());
-//        }
+        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
+        this.logMap.entrySet()){
+            for (Map.Entry<Long, ArrayList<Integer>> entry2 :
+                    entry.getValue().entrySet()) {
+                Collections.sort(entry2.getValue());
+            }
+        }
 //        System.out.println(this.logMap.size());
     }
 
