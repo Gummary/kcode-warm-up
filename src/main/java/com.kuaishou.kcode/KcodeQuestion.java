@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KcodeQuestion {
 
     private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
-    private static final int NUM_THREAD = 6;
+    private static final int NUM_THREAD = 10;
 
 
     public KcodeQuestion() {
@@ -34,7 +34,7 @@ public class KcodeQuestion {
         Signal signal = new Signal();
         Thread producer = new Thread(new Producer(inputStream, queue, signal));
         producer.start();
-        Thread[] consumers = new Thread[NUM_THREAD-1];
+        Thread[] consumers = new Thread[NUM_THREAD];
         for (int i = 0; i < consumers.length; i++) {
             consumers[i]  = new Thread(new Consumer(queue, this.logMap, signal));
             consumers[i].start();
