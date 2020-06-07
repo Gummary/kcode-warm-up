@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KcodeQuestion {
 
     private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
-    private static final int NUM_THREAD = 5;
+    private static final int NUM_THREAD = 6;
 
 
     public KcodeQuestion() {
