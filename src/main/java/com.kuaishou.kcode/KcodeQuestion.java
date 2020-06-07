@@ -30,7 +30,7 @@ public class KcodeQuestion {
      * @param inputStream
      */
     public void prepare(InputStream inputStream) {
-        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD*2);
+        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
         Signal signal = new Signal();
         Thread producer = new Thread(new Producer(inputStream, queue, signal));
         producer.start();
