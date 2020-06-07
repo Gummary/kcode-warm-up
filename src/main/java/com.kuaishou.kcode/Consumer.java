@@ -44,6 +44,7 @@ public class Consumer implements Runnable{
             char[] data = blockingQueue.poll();
 
             if (data != null)  {
+//                Long start = System.currentTimeMillis();
                 int dataLength = data.length;
                 int startMessageIdx = 0;
                 int secondDotIdx = 0;
@@ -67,17 +68,21 @@ public class Consumer implements Runnable{
                             if (value == null) {
                                 value = new HashMap<>();
                             }
-                            ArrayList<Integer> l =  value.getOrDefault(timestamp, new ArrayList<>(2<<20));
+                            ArrayList<Integer> l =  value.getOrDefault(timestamp, new ArrayList<>());
                             int pos = this.binarySearch(l, responseTime);
                             l.add(pos, responseTime);
                             value.put(timestamp, l);
                             return value;
                         });
+
                     }
                 }
+//                System.out.println(System.currentTimeMillis() - start);
             }
             else if(this.signal.isNoData()) {
                 break;
+            } else {
+//                System.out.println("Waiting for data");
             }
         }
     }

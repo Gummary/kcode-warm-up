@@ -13,7 +13,7 @@ public class Producer implements Runnable{
     private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
     private final Signal signal;
-    private static final int BUFFERSIZE = 10 * 1024 * 1024;
+    private static final int BUFFERSIZE = 1024;
 
     public Producer(InputStream is, ArrayBlockingQueue<char[]> queue, Signal signal) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
@@ -27,6 +27,7 @@ public class Producer implements Runnable{
         int bufferRemain = BUFFERSIZE-offset;
         try {
             char[] buffer = new char[BUFFERSIZE];
+//            Long start = System.currentTimeMillis();
             while(this.bufferedReader.read(buffer, offset, bufferRemain) > 0) {
                 char[] tmpbuffer;
                 int last_index = BUFFERSIZE - 1;
@@ -45,9 +46,12 @@ public class Producer implements Runnable{
                 if (roundSize >= 0) {
                     System.arraycopy(tmpbuffer, last_index + 1, buffer, 0, roundSize);
                 }
+//                System.out.println(System.currentTimeMillis() - start);
+//                start = System.currentTimeMillis();
             }
             this.blockingQueue.put(buffer);
             this.signal.setNoData(true);
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
