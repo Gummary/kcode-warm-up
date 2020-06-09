@@ -1,9 +1,6 @@
 package com.kuaishou.kcode;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class Consumer implements Runnable{
@@ -64,9 +61,9 @@ public class Consumer implements Runnable{
 
         for (String methodName :
                 map.keySet()) {
-            int sum = 0;
+            double sum = 0;
             ArrayList<Log> logs = map.get(methodName);
-            Collections.sort(logs);
+            logs.sort(Comparator.comparingInt(Log::getResponseTime));
             for (Log l :
                     logs) {
                 sum += l.getResponseTime();
@@ -75,10 +72,10 @@ public class Consumer implements Runnable{
             int qps = logs.size();
             int p99_idx = (int) Math.ceil((double)logs.size()*0.99)-1;
             int p50_idx = (int)Math.ceil((double)logs.size()*0.5)-1;
-            int p99 = logs.indexOf(p99_idx);
-            int p50 = logs.indexOf(p50_idx);
-            int avg = (int) Math.ceil((double)sum / (double) logs.size());
-            int max = logs.indexOf(logs.size()-1);
+            int p99 = logs.get(p99_idx).getResponseTime();
+            int p50 = logs.get(p50_idx).getResponseTime();
+            int avg = (int) Math.ceil(sum / (double) logs.size());
+            int max = logs.get(logs.size()-1).getResponseTime();
 
             String result = String.valueOf(qps) + ',' + p99 + ',' + p50 + ',' + avg + ',' + max;
             HashMap<Long, String> methodQPSMap = resultMap.getOrDefault(methodName, new HashMap<>(4200));
