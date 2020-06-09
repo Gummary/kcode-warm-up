@@ -125,6 +125,7 @@ public class Consumer implements Runnable{
 //                System.out.println(System.currentTimeMillis() - start);
             }
             else if(this.signal.isNoData()) {
+                calculateResult();
                 break;
             } else {
 //                System.out.println("Waiting for data");
