@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KcodeQuestion {
 
-    private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
+    private final HashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
     private static final int NUM_THREAD = 8;
 
 
     public KcodeQuestion() {
-        logMap = new ConcurrentHashMap<>(2<<7);
+        logMap = new HashMap<>(2<<7);
     }
 
     /**
@@ -29,26 +29,16 @@ public class KcodeQuestion {
      *
      * @param inputStream
      */
-    public void prepare(InputStream inputStream) {
+    public void prepare(InputStream inputStream) throws InterruptedException {
         ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
         Signal signal = new Signal();
         Thread producer = new Thread(new Producer(inputStream, queue, signal));
+        Thread consumer = new Thread(new Consumer(queue, logMap, signal));
         producer.start();
-        Thread[] consumers = new Thread[NUM_THREAD];
-        for (int i = 0; i < consumers.length; i++) {
-            consumers[i]  = new Thread(new Consumer(queue, this.logMap, signal));
-            consumers[i].start();
-        }
+        consumer.start();
 
-        try {
-            producer.join();
-            for (Thread t :
-                    consumers) {
-                t.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        producer.join();
+        consumer.join();
 //        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
 //        this.logMap.entrySet()){
 //            System.out.println(entry.getKey().length());

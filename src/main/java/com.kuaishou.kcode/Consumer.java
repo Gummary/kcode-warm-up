@@ -3,17 +3,16 @@ package com.kuaishou.kcode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Consumer implements Runnable{
 
     private final ArrayBlockingQueue<char []> blockingQueue;
-    private final ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> concurrentHashMap;
+    private final HashMap<String, HashMap<Long, ArrayList<Integer>>> resultMap;
     private final Signal signal;
 
-    public Consumer(ArrayBlockingQueue<char[]> queue, ConcurrentHashMap<String, HashMap<Long, ArrayList<Integer>>> map, Signal signal) {
+    public Consumer(ArrayBlockingQueue<char[]> queue, HashMap<String, HashMap<Long, ArrayList<Integer>>> map, Signal signal) {
         this.blockingQueue = queue;
-        this.concurrentHashMap = map;
+        resultMap = map;
         this.signal = signal;
     }
 
@@ -64,7 +63,7 @@ public class Consumer implements Runnable{
 
                         int responseTime = Integer.parseInt(new String(data, secondDotIdx + 1, i - secondDotIdx - 1));
                         startMessageIdx = i+1;
-                        concurrentHashMap.compute(methodName, (key, value)->{
+                        resultMap.compute(methodName, (key, value)->{
                             if (value == null) {
                                 value = new HashMap<>();
                             }
