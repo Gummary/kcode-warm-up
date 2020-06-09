@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KcodeQuestion {
 
-    private final HashMap<String, HashMap<Long, ArrayList<Integer>>> logMap;
+    private final HashMap<String, HashMap<Long, String>> logMap;
     private static final int NUM_THREAD = 8;
 
 
@@ -54,61 +54,7 @@ public class KcodeQuestion {
      * @param methodName 方法名称
      */
     public String getResult(Long timestamp, String methodName) {
-        // do something
-        HashMap<Long, ArrayList<Integer>> logs = this.logMap.get(methodName);
-        ArrayList<Integer> responseTimes = logs.get(timestamp);
-
-        int qps = responseTimes.size();
-//        Collections.sort(responseTimes);
-        int sum = 0;
-        for (Integer responseTime:
-                responseTimes) {
-            sum += responseTime;
-        }
-        int p99_idx = (int) Math.ceil((double)responseTimes.size()*0.99)-1;
-        int p50_idx = (int)Math.ceil((double)responseTimes.size()*0.5)-1;
-        int p99 = responseTimes.get(p99_idx);
-        int p50 = responseTimes.get(p50_idx);
-        int avg = (int) Math.ceil((double)sum / (double) responseTimes.size());
-        int max = responseTimes.get(responseTimes.size()-1);
-
-        return String.valueOf(qps) +
-                ',' +
-                p99 +
-                ',' +
-                p50 +
-                ',' +
-                avg +
-                ',' +
-                max;
+        return logMap.get(methodName).get(timestamp);
     }
-
-    public void debugGetResult(Long timestamp, String methodName) {
-        // do something
-        HashMap<Long, ArrayList<Integer>> logs = this.logMap.get(methodName);
-        ArrayList<Integer> responseTimes = logs.get(timestamp);
-
-        int qps = responseTimes.size();
-        Collections.sort(responseTimes);
-        int sum = 0;
-        for (Integer responseTime:
-                responseTimes) {
-            sum += responseTime;
-        }
-        int p99_idx = (int) Math.ceil((double)responseTimes.size()*0.99);
-        int p50_idx = (int)Math.ceil((double)responseTimes.size()*0.5);
-        int p99 = responseTimes.get(p99_idx);
-        int p50 = responseTimes.get(p50_idx);
-        int avg = (int) Math.ceil((double)sum / (double) responseTimes.size());
-        int max = responseTimes.get(responseTimes.size()-1);
-
-//        String info = "P50 index: " + p50_idx + ","
-//                + "P50: " + responseTimes.get(p50_idx) + ","
-//                + "P50 index-1: " + responseTimes.get(p50_idx-1) + ","
-//                + "P50 index+1: " + responseTimes.get(p50_idx+1) + ",";
-//        System.out.println(info);
-    }
-
-
 
 }

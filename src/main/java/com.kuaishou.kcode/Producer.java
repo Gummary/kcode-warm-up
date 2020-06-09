@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -13,7 +12,7 @@ public class Producer implements Runnable{
     private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
     private final Signal signal;
-    private static final int BUFFERSIZE = 64;
+    private static final int BUFFERSIZE = 1024;
 
     public Producer(InputStream is, ArrayBlockingQueue<char[]> queue, Signal signal) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
