@@ -90,11 +90,10 @@ public class Consumer implements Runnable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (data.length < 10) {
+            int dataLength = data.length;
+            if(dataLength < 10){
                 break;
             }
-//                Long start = System.currentTimeMillis();
-            int dataLength = data.length;
             int startMessageIdx = 0;
             int secondDotIdx = 0;
 

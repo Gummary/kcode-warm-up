@@ -11,7 +11,7 @@ public class Producer implements Runnable{
 
     private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
-    private static final int BUFFERSIZE = 256;
+    private static final int BUFFERSIZE = 512;
 
     public Producer(InputStream is, ArrayBlockingQueue<char[]> queue) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
