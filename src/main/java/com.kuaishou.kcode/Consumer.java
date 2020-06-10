@@ -7,16 +7,13 @@ public class Consumer implements Runnable{
 
     private final ArrayBlockingQueue<char []> blockingQueue;
     private final HashMap<String, HashMap<Long, String>> resultMap;
-    private final Signal signal;
     private Long currentTimestamp;
     private ArrayDeque<Log> allLogs;
 
     public Consumer(ArrayBlockingQueue<char[]> queue,
-                    HashMap<String, HashMap<Long, String>> map,
-                    Signal signal) {
+                    HashMap<String, HashMap<Long, String>> map) {
         this.blockingQueue = queue;
         resultMap = map;
-        this.signal = signal;
         currentTimestamp = -1L;
         allLogs = new ArrayDeque<>();
     }
@@ -87,45 +84,43 @@ public class Consumer implements Runnable{
     @Override
     public void run() {
         while (true) {
-            char[] data = blockingQueue.poll();
-
-            if (data != null)  {
-//                Long start = System.currentTimeMillis();
-                int dataLength = data.length;
-                int startMessageIdx = 0;
-                int secondDotIdx = 0;
-
-                for (int i = 0; i < dataLength; i++) {
-                    if (data[i] == '\0') {
-                        break;
-                    } else if (data[i] == '\n') {
-                        Long timestamp = Long.parseLong(new String(data, startMessageIdx,10));
-                        for(int  j = i;j > startMessageIdx; j--){
-                            if(data[j] ==','){
-                                secondDotIdx = j;
-                                break;
-                            }
-                        }
-                        String methodName = new String(data, startMessageIdx + 14, secondDotIdx - startMessageIdx - 14);
-
-                        int responseTime = Integer.parseInt(new String(data, secondDotIdx + 1, i - secondDotIdx - 1));
-                        Log log = new Log(timestamp, methodName, responseTime);
-                        if(!currentTimestamp.equals(timestamp)) {
-                            calculateResult();
-                            currentTimestamp = timestamp;
-                        }
-                        allLogs.push(log);
-
-                        startMessageIdx = i+1;
-                    }
-                }
-//                System.out.println(System.currentTimeMillis() - start);
+            char[] data = new char[0];
+            try {
+                data = blockingQueue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            else if(this.signal.isNoData()) {
-                calculateResult();
+            if (data.length < 10) {
                 break;
-            } else {
-//                System.out.println("Waiting for data");
+            }
+//                Long start = System.currentTimeMillis();
+            int dataLength = data.length;
+            int startMessageIdx = 0;
+            int secondDotIdx = 0;
+
+            for (int i = 0; i < dataLength; i++) {
+                if (data[i] == '\0') {
+                    break;
+                } else if (data[i] == '\n') {
+                    Long timestamp = Long.parseLong(new String(data, startMessageIdx, 10));
+                    for (int j = i; j > startMessageIdx; j--) {
+                        if (data[j] == ',') {
+                            secondDotIdx = j;
+                            break;
+                        }
+                    }
+                    String methodName = new String(data, startMessageIdx + 14, secondDotIdx - startMessageIdx - 14);
+
+                    int responseTime = Integer.parseInt(new String(data, secondDotIdx + 1, i - secondDotIdx - 1));
+                    Log log = new Log(methodName, responseTime);
+                    if (!currentTimestamp.equals(timestamp)) {
+                        calculateResult();
+                        currentTimestamp = timestamp;
+                    }
+                    allLogs.push(log);
+
+                    startMessageIdx = i + 1;
+                }
             }
         }
     }

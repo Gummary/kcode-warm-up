@@ -1,14 +1,8 @@
 package com.kuaishou.kcode;
 
-import sun.rmi.runtime.Log;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kcode
@@ -31,9 +25,8 @@ public class KcodeQuestion {
      */
     public void prepare(InputStream inputStream) throws InterruptedException {
         ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
-        Signal signal = new Signal();
-        Thread producer = new Thread(new Producer(inputStream, queue, signal));
-        Thread consumer = new Thread(new Consumer(queue, logMap, signal));
+        Thread producer = new Thread(new Producer(inputStream, queue));
+        Thread consumer = new Thread(new Consumer(queue, logMap));
         producer.start();
         consumer.start();
 

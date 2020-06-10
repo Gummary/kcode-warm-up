@@ -11,13 +11,11 @@ public class Producer implements Runnable{
 
     private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
-    private final Signal signal;
     private static final int BUFFERSIZE = 256;
 
-    public Producer(InputStream is, ArrayBlockingQueue<char[]> queue, Signal signal) {
+    public Producer(InputStream is, ArrayBlockingQueue<char[]> queue) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
         this.blockingQueue = queue;
-        this.signal = signal;
     }
 
     @Override
@@ -49,8 +47,7 @@ public class Producer implements Runnable{
 //                start = System.currentTimeMillis();
             }
             this.blockingQueue.put(buffer);
-            this.signal.setNoData(true);
-
+            this.blockingQueue.put(new char[5]);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
