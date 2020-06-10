@@ -1,12 +1,8 @@
 package com.kuaishou.kcode;
 
 public class Log implements Comparable{
-    private final Long timeStamp;
     private final String methodName;
 
-    public Long getTimeStamp() {
-        return timeStamp;
-    }
 
     public String getMethodName() {
         return methodName;
@@ -18,8 +14,7 @@ public class Log implements Comparable{
 
     private final int responseTime;
 
-    public Log(Long timeStamp, String methodName, int responseTime) {
-        this.timeStamp = timeStamp;
+    public Log(String methodName, int responseTime) {
         this.methodName = methodName;
         this.responseTime = responseTime;
     }

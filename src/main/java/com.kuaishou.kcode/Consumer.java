@@ -109,7 +109,7 @@ public class Consumer implements Runnable{
                         String methodName = new String(data, startMessageIdx + 14, secondDotIdx - startMessageIdx - 14);
 
                         int responseTime = Integer.parseInt(new String(data, secondDotIdx + 1, i - secondDotIdx - 1));
-                        Log log = new Log(timestamp, methodName, responseTime);
+                        Log log = new Log(methodName, responseTime);
                         if(!currentTimestamp.equals(timestamp)) {
                             calculateResult();
                             currentTimestamp = timestamp;
