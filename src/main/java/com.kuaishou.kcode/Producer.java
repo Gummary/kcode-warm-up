@@ -49,7 +49,7 @@ public class Producer implements Runnable{
 //                start = System.currentTimeMillis();
             }
             this.blockingQueue.put(buffer);
-            this.signal.setNoData(true);
+            this.signal.setNoData();
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

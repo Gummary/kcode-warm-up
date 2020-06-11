@@ -1,13 +1,13 @@
 package com.kuaishou.kcode;
 
 public class Signal {
-    private boolean noData = false;
+    private volatile boolean noData = false;
 
-    public synchronized void setNoData(boolean noData) {
-        this.noData = noData;
+    public void setNoData() {
+        this.noData = true;
     }
 
-    public synchronized boolean isNoData(){
+    public boolean isNoData(){
         return noData == true;
     }
 }
