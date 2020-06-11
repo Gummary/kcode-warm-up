@@ -9,7 +9,8 @@ public class Consumer implements Runnable{
     private final HashMap<String, HashMap<Long, String>> resultMap;
     private final Signal signal;
     private Long currentTimestamp;
-    private ArrayDeque<Log> allLogs;
+    private final ArrayDeque<Log> allLogs;
+    private final HashMap<String, Integer> sumMap;
 
     public Consumer(ArrayBlockingQueue<char[]> queue,
                     HashMap<String, HashMap<Long, String>> map,
@@ -19,6 +20,8 @@ public class Consumer implements Runnable{
         this.signal = signal;
         currentTimestamp = -1L;
         allLogs = new ArrayDeque<>();
+        sumMap = new HashMap<String, Integer>();
+
     }
 
 
@@ -61,13 +64,9 @@ public class Consumer implements Runnable{
 
         for (String methodName :
                 map.keySet()) {
-            double sum = 0;
+            double sum = (double)sumMap.get(methodName);
             ArrayList<Log> logs = map.get(methodName);
             logs.sort(Comparator.comparingInt(Log::getResponseTime));
-            for (Log l :
-                    logs) {
-                sum += l.getResponseTime();
-            }
 
             int qps = logs.size();
             int p99_idx = (int) Math.ceil((double)logs.size()*0.99)-1;
@@ -113,7 +112,10 @@ public class Consumer implements Runnable{
                         if(!currentTimestamp.equals(timestamp)) {
                             calculateResult();
                             currentTimestamp = timestamp;
+                            sumMap.replaceAll((k, v) -> 0);
                         }
+                        int sum = sumMap.getOrDefault(methodName, 0);
+                        sumMap.put(methodName, sum+responseTime);
                         allLogs.push(log);
 
                         startMessageIdx = i+1;
