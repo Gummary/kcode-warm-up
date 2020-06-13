@@ -36,7 +36,7 @@ public class KcodeQuestion {
         producer.join();
         consumer.join();
 
-        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
+//        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
 
 //        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
 //        this.logMap.entrySet()){
