@@ -102,7 +102,9 @@ public class Consumer implements Runnable{
 
     @Override
     public void run() {
+        Long start = System.currentTimeMillis();
         while (true) {
+            start = 0L;
             char[] data = new char[0];
             try {
                 data = blockingQueue.take();
@@ -143,6 +145,13 @@ public class Consumer implements Runnable{
                     startMessageIdx = i + 1;
                 }
             }
+            processBlockAM.Update(System.currentTimeMillis() - start);
         }
+        this.runningInfo.put("consumer",
+                        "Calculate Time Avg:"+calResultAM.getAverage() +
+                        " Calculate Time Sum:" + calResultAM.getSum() +
+                        " Process Time Avg:" + processBlockAM.getAverage() +
+                        " Process Time sum:" + processBlockAM.getSum()
+                );
     }
 }

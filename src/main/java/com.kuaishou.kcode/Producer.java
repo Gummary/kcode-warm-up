@@ -14,6 +14,7 @@ public class Producer implements Runnable{
     private final BufferedReader bufferedReader;
     private static final int BUFFERSIZE = 512;
     private final ConcurrentHashMap<String, String> runningInfo;
+    private AveragerMeter readAM;
 
     public Producer(InputStream is,
                     ArrayBlockingQueue<char[]> queue,
@@ -21,12 +22,14 @@ public class Producer implements Runnable{
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
         this.blockingQueue = queue;
         this.runningInfo = runningInfo;
+        readAM = new AveragerMeter();
     }
     public Producer(InputStream is,
                     ArrayBlockingQueue<char[]> queue) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
         this.blockingQueue = queue;
         this.runningInfo = null;
+        readAM = new AveragerMeter();
     }
 
 
@@ -36,7 +39,7 @@ public class Producer implements Runnable{
         int bufferRemain = BUFFERSIZE-offset;
         try {
             char[] buffer = new char[BUFFERSIZE];
-//            Long start = System.currentTimeMillis();
+            Long start = System.currentTimeMillis();
             while(this.bufferedReader.read(buffer, offset, bufferRemain) > 0) {
                 char[] tmpbuffer;
                 int last_index = BUFFERSIZE - 1;
@@ -55,11 +58,12 @@ public class Producer implements Runnable{
                 if (roundSize >= 0) {
                     System.arraycopy(tmpbuffer, last_index + 1, buffer, 0, roundSize);
                 }
-//                System.out.println(System.currentTimeMillis() - start);
-//                start = System.currentTimeMillis();
+                readAM.Update(System.currentTimeMillis() - start);
+                start = System.currentTimeMillis();
             }
             this.blockingQueue.put(buffer);
             this.blockingQueue.put(new char[5]);
+            this.runningInfo.put("producer", "ReadAvg:" + readAM.getAverage() + "ReadSum" + readAM.getSum());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
