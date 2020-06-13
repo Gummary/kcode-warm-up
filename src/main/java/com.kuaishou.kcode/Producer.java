@@ -39,7 +39,7 @@ public class Producer implements Runnable{
         int bufferRemain = BUFFERSIZE-offset;
         try {
             char[] buffer = new char[BUFFERSIZE];
-            Long start = System.currentTimeMillis();
+//            Long start = System.currentTimeMillis();
             while(this.bufferedReader.read(buffer, offset, bufferRemain) > 0) {
                 char[] tmpbuffer;
                 int last_index = BUFFERSIZE - 1;
@@ -58,8 +58,8 @@ public class Producer implements Runnable{
                 if (roundSize >= 0) {
                     System.arraycopy(tmpbuffer, last_index + 1, buffer, 0, roundSize);
                 }
-                readAM.Update(System.currentTimeMillis() - start);
-                start = System.currentTimeMillis();
+//                readAM.Update(System.currentTimeMillis() - start);
+//                start = System.currentTimeMillis();
             }
             this.blockingQueue.put(buffer);
             this.blockingQueue.put(new char[5]);

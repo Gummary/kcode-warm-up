@@ -64,7 +64,7 @@ public class Consumer implements Runnable{
         if(currentTimestamp.equals(-1L)){
             return;
         }
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         HashMap<String, ArrayList<Log>> map = new HashMap<>();
         while(!allLogs.isEmpty()) {
             Log log = allLogs.pop();
@@ -97,12 +97,12 @@ public class Consumer implements Runnable{
             methodQPSMap.put(currentTimestamp, result);
             resultMap.put(methodName, methodQPSMap);
         }
-        calResultAM.Update(System.currentTimeMillis() - start);
+//        calResultAM.Update(System.currentTimeMillis() - start);
     }
 
     @Override
     public void run() {
-        Long start = System.currentTimeMillis();
+//        Long start = System.currentTimeMillis();
         while (true) {
             char[] data = new char[0];
             try {
@@ -144,8 +144,8 @@ public class Consumer implements Runnable{
                     startMessageIdx = i + 1;
                 }
             }
-            processBlockAM.Update(System.currentTimeMillis() - start);
-            start = System.currentTimeMillis();
+//            processBlockAM.Update(System.currentTimeMillis() - start);
+//            start = System.currentTimeMillis();
         }
         this.runningInfo.put("consumer",
                         "Calculate Time Avg:"+calResultAM.getAverage() +
