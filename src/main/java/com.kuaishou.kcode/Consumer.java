@@ -153,5 +153,6 @@ public class Consumer implements Runnable{
                         " Process Time Avg:" + processBlockAM.getAverage() +
                         " Process Time sum:" + processBlockAM.getSum()
                 );
+
     }
 }
