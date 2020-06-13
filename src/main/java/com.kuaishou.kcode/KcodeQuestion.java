@@ -5,44 +5,34 @@ import java.util.*;
 
 public class KcodeQuestion {
 
-    private static Operation[] operations=new Operation[1024*1024];
-    private static final Result result = new Result();
+    private final HashMap<String, HashMap<Long, String>> logMap;
+    private static final int NUM_THREAD = 8;
+
+
+    public KcodeQuestion() {
+        logMap = new HashMap<>(2<<7);
+    }
+
     /**
      * prepare() 方法用来接受输入数据集，数据集格式参考README.md
      *
      * @param inputStream
      */
-    /*输入格式如下(132610000行，按照时间戳升序)
-        1587987945950,mockUser2,43
-        1587987945398,mockUser8,35
-        1587987945321,getInfo7,60
-        1587987945010,checkPass7,10
-     */
-    //测试数据1s最多20W条，一共69个方法，时间跨度4201s
-    public void prepare(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        int idx=0;
-        long oldTimeStamp=-1;
-        long currentTimeStamp = 0;
+    public void prepare(InputStream inputStream) throws InterruptedException {
+        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
+        Signal signal = new Signal();
+        Thread producer = new Thread(new Producer(inputStream, queue, signal));
+        Thread consumer = new Thread(new Consumer(queue, logMap, signal));
+        producer.start();
+        consumer.start();
 
-        while ((line = reader.readLine()) != null){
-//            System.out.println(line);
-            String[] strs=line.split(",");
-            currentTimeStamp=Long.valueOf(strs[0]);
-            if(currentTimeStamp/1000!=oldTimeStamp){
-                prepareResult(oldTimeStamp,idx);
-                oldTimeStamp=currentTimeStamp/1000;
-                idx=0;
-            }
-            if(operations[idx]==null) {
-                operations[idx]=new Operation();
-            }
-            //timeStampMs not set
-            operations[idx++].setMethodName(strs[1])
-                    .setDuration(Integer.valueOf(strs[2]));
-        }
-        prepareResult(currentTimeStamp/1000,idx);
+        producer.join();
+        consumer.join();
+//        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
+//        this.logMap.entrySet()){
+//            System.out.println(entry.getKey().length());
+//        }
+//        System.out.println(this.logMap.size());
     }
 
     /**
@@ -54,51 +44,7 @@ public class KcodeQuestion {
      */
     //测试数据共289800条
     public String getResult(Long timestamp, String methodName) {
-//        return "QPS,P99,P50,AVG,MAX";
-        return result.getResult(timestamp,methodName);
+        return logMap.get(methodName).get(timestamp);
     }
 
-    /**
-     * 按照方法-时间排序，在对应的方法内加入对应时间戳的结果
-     * @param timestamp 秒级时间戳
-     * @param cnt 当前秒的操作个数
-     */
-    public void prepareResult(long timestamp,int cnt){
-        if(timestamp<0 || cnt==0) return;
-        //System.out.println("=="+cnt);
-        Arrays.sort(operations, 0, cnt, (o1, o2) -> {
-            int ret=o1.getMethodName().compareTo(o2.getMethodName());
-            if(ret==0){
-                return Integer.compare(o1.getDuration(), o2.getDuration());
-            }
-            return ret<0? -1:1;
-        });
-        String oldMethodName="";
-        int lastIdx=-1;
-        for(int i=0;i<cnt;i++){
-            if(!operations[i].getMethodName().equals(oldMethodName)){
-                if(lastIdx>=0){
-                    result.addResult(timestamp,oldMethodName,computeAns(lastIdx,i));
-                }
-                oldMethodName=operations[i].getMethodName();
-                lastIdx=i;
-            }
-            //System.out.println(timestamp+" "+operations[i].getMethodName()+" "+operations[i].getDuration());
-        }
-        result.addResult(timestamp,oldMethodName,computeAns(lastIdx,cnt));
-    }
-
-    public String computeAns(int st,int ed){
-        //"QPS,P99,P50,AVG,MAX"
-        int QPS=ed-st;
-        int P99 = operations[st+(int) Math.ceil(QPS*0.99)-1].getDuration();
-        int P50 = operations[st+(int) Math.ceil(QPS*0.50)-1].getDuration();
-        int sum=0;
-        for(int i=st;i<ed;i++){
-            sum+=operations[i].getDuration();
-        }
-        int AVG= (sum+ed-st-1)/QPS;
-        int MAX=operations[ed-1].getDuration();
-        return QPS+","+P99+","+P50+","+AVG+","+MAX;
-    }
 }
