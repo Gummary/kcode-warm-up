@@ -29,11 +29,6 @@ public class KcodeQuestion {
 
         producer.join();
         consumer.join();
-//        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
-//        this.logMap.entrySet()){
-//            System.out.println(entry.getKey().length());
-//        }
-//        System.out.println(this.logMap.size());
     }
 
     /**
