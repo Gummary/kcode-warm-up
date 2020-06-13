@@ -3,6 +3,7 @@ package com.kuaishou.kcode;
 import java.io.*;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kcode
@@ -23,15 +24,20 @@ public class KcodeQuestion {
      *
      * @param inputStream
      */
-    public void prepare(InputStream inputStream) throws InterruptedException {
+    public void prepare(InputStream inputStream) throws Exception {
+        Long start = System.currentTimeMillis();
+        ConcurrentHashMap<String, String> runningInfo = new ConcurrentHashMap<>();
         ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
-        Thread producer = new Thread(new Producer(inputStream, queue));
-        Thread consumer = new Thread(new Consumer(queue, logMap));
+        Thread producer = new Thread(new Producer(inputStream, queue, runningInfo));
+        Thread consumer = new Thread(new Consumer(queue, logMap, runningInfo));
         producer.start();
         consumer.start();
 
         producer.join();
         consumer.join();
+
+        throw new Exception("Prepare time" + (System.currentTimeMillis()-start));
+
 //        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
 //        this.logMap.entrySet()){
 //            System.out.println(entry.getKey().length());

@@ -6,17 +6,29 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Producer implements Runnable{
 
     private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
     private static final int BUFFERSIZE = 512;
+    private final ConcurrentHashMap<String, String> runningInfo;
 
-    public Producer(InputStream is, ArrayBlockingQueue<char[]> queue) {
+    public Producer(InputStream is,
+                    ArrayBlockingQueue<char[]> queue,
+                    ConcurrentHashMap<String, String> runningInfo) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
         this.blockingQueue = queue;
+        this.runningInfo = runningInfo;
     }
+    public Producer(InputStream is,
+                    ArrayBlockingQueue<char[]> queue) {
+        this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
+        this.blockingQueue = queue;
+        this.runningInfo = null;
+    }
+
 
     @Override
     public void run() {

@@ -2,14 +2,31 @@ package com.kuaishou.kcode;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Consumer implements Runnable{
 
     private final ArrayBlockingQueue<char []> blockingQueue;
     private final HashMap<String, HashMap<Long, String>> resultMap;
     private Long currentTimestamp;
-    private ArrayDeque<Log> allLogs;
-    private HashMap<String, Integer> sumMap;
+    private final ArrayDeque<Log> allLogs;
+    private final HashMap<String, Integer> sumMap;
+    private final ConcurrentHashMap<String, String> runningInfo;
+    private AveragerMeter calResultAM;
+    private AveragerMeter processBlockAM;
+
+    public Consumer(ArrayBlockingQueue<char[]> queue,
+                    HashMap<String, HashMap<Long, String>> map,
+                    ConcurrentHashMap<String, String> runningInfo) {
+        this.blockingQueue = queue;
+        resultMap = map;
+        currentTimestamp = -1L;
+        allLogs = new ArrayDeque<>();
+        sumMap = new HashMap<>();
+        this.runningInfo = runningInfo;
+        calResultAM = new AveragerMeter();
+        processBlockAM = new AveragerMeter();
+    }
 
     public Consumer(ArrayBlockingQueue<char[]> queue,
                     HashMap<String, HashMap<Long, String>> map) {
@@ -18,8 +35,10 @@ public class Consumer implements Runnable{
         currentTimestamp = -1L;
         allLogs = new ArrayDeque<>();
         sumMap = new HashMap<>();
+        runningInfo = null;
+        calResultAM = new AveragerMeter();
+        processBlockAM = new AveragerMeter();
     }
-
 
 
     private int binarySearch(ArrayList<Integer> list, Integer value) {
@@ -45,6 +64,7 @@ public class Consumer implements Runnable{
         if(currentTimestamp.equals(-1L)){
             return;
         }
+        Long start = System.currentTimeMillis();
         HashMap<String, ArrayList<Log>> map = new HashMap<>();
         while(!allLogs.isEmpty()) {
             Log log = allLogs.pop();
@@ -77,6 +97,7 @@ public class Consumer implements Runnable{
             methodQPSMap.put(currentTimestamp, result);
             resultMap.put(methodName, methodQPSMap);
         }
+        calResultAM.Update(System.currentTimeMillis() - start);
     }
 
     @Override
