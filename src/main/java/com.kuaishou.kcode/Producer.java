@@ -11,30 +11,21 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class Producer implements Runnable{
 
-    private final ArrayBlockingQueue<LogContainer> blockingQueue;
+    private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
     private final Signal signal;
     private static final int BUFFERSIZE = 512;
 
-    public Producer(InputStream is, ArrayBlockingQueue<LogContainer> queue, Signal signal) {
+    public Producer(InputStream is, ArrayBlockingQueue<char []> queue, Signal signal) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.US_ASCII));
         this.blockingQueue = queue;
         this.signal = signal;
     }
 
-    private void addToArray(Long timeStamp, HashMap<String, ArrayList<Integer>> logs)
-    {
-        if(timeStamp == -1) {
-            return;
-        }
-        LogContainer lc = new LogContainer(timeStamp, logs);
-        this.blockingQueue.add(lc);
-    }
-
     @Override
     public void run() {
-        String line = null;
-        Long currentTimeStamp = -1L;
+        int offset = 0;
+        int bufferRemain = BUFFERSIZE;
         HashMap<String, ArrayList<Integer>> logs = null;
         try {
             char[] buffer = new char[BUFFERSIZE];
@@ -66,6 +57,6 @@ public class Producer implements Runnable{
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        this.signal.setNoData(true);
+        this.signal.setNoData();
     }
 }
