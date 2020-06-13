@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KcodeQuestion {
 
     private final HashMap<String, HashMap<Long, String>> logMap;
-    private static final int NUM_THREAD = 8;
 
 
     public KcodeQuestion() {
@@ -28,7 +27,7 @@ public class KcodeQuestion {
 
 
         ConcurrentHashMap<String, String> runningInfo = new ConcurrentHashMap<>();
-        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
+        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(2<<10);
         Thread producer = new Thread(new Producer(inputStream, queue, runningInfo));
         Thread consumer = new Thread(new Consumer(queue, logMap, runningInfo));
         producer.start();
