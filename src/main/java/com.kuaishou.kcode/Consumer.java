@@ -144,8 +144,8 @@ public class Consumer implements Runnable{
                     startMessageIdx = i + 1;
                 }
             }
-            start = System.currentTimeMillis();
             processBlockAM.Update(System.currentTimeMillis() - start);
+            start = System.currentTimeMillis();
         }
         this.runningInfo.put("consumer",
                         "Calculate Time Avg:"+calResultAM.getAverage() +
