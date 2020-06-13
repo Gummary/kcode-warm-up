@@ -64,7 +64,7 @@ public class Consumer implements Runnable{
         if(currentTimestamp.equals(-1L)){
             return;
         }
-        Long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         HashMap<String, ArrayList<Log>> map = new HashMap<>();
         while(!allLogs.isEmpty()) {
             Log log = allLogs.pop();
@@ -104,7 +104,6 @@ public class Consumer implements Runnable{
     public void run() {
         Long start = System.currentTimeMillis();
         while (true) {
-            start = 0L;
             char[] data = new char[0];
             try {
                 data = blockingQueue.take();
@@ -145,6 +144,7 @@ public class Consumer implements Runnable{
                     startMessageIdx = i + 1;
                 }
             }
+            start = System.currentTimeMillis();
             processBlockAM.Update(System.currentTimeMillis() - start);
         }
         this.runningInfo.put("consumer",
