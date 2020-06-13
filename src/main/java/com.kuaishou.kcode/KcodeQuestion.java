@@ -26,19 +26,18 @@ public class KcodeQuestion {
      */
     public void prepare(InputStream inputStream) throws Exception {
 
-        throw new Exception("Test");
 
-//        ConcurrentHashMap<String, String> runningInfo = new ConcurrentHashMap<>();
-//        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
-//        Thread producer = new Thread(new Producer(inputStream, queue, runningInfo));
-//        Thread consumer = new Thread(new Consumer(queue, logMap, runningInfo));
-//        producer.start();
-//        consumer.start();
-//
-//        producer.join();
-//        consumer.join();
+        ConcurrentHashMap<String, String> runningInfo = new ConcurrentHashMap<>();
+        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(NUM_THREAD);
+        Thread producer = new Thread(new Producer(inputStream, queue, runningInfo));
+        Thread consumer = new Thread(new Consumer(queue, logMap, runningInfo));
+        producer.start();
+        consumer.start();
 
-//        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
+        producer.join();
+        consumer.join();
+
+        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
 
 //        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
 //        this.logMap.entrySet()){
