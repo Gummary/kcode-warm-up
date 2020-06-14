@@ -98,7 +98,7 @@ public class Consumer implements Runnable{
         }
         calculateResult();
         Signal.NODATA = true;
-        this.runningInfo.put("Consumer", "Calculate Period"+processBlockAM.getAverage() + "Calculate Total"+processBlockAM.getSum());
+        this.runningInfo.put("Consumer", "Calculate Period"+calResultAM.getAverage() + "Calculate Total"+calResultAM.getSum());
 //        this.runningInfo.put("consumer",
 //                        "Calculate Time Avg:"+calResultAM.getAverage() +
 //                        " Calculate Time Sum:" + calResultAM.getSum() +
