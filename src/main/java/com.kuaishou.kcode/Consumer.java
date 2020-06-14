@@ -78,11 +78,8 @@ public class Consumer implements Runnable{
         for (String methodName :
                 map.keySet()) {
             ArrayList<Log> logs = map.get(methodName);
-            double sum = 0;
-            for (Log l:
-                    logs) {
-                sum += l.getResponseTime();
-            }
+            double sum = logs.stream().mapToDouble(Log::getResponseTime).sum();
+
             logs.sort(Comparator.comparingInt(Log::getResponseTime));
 
             int qps = logs.size();
