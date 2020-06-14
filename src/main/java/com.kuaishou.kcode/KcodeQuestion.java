@@ -1,8 +1,6 @@
 package com.kuaishou.kcode;
 
 import java.io.*;
-import java.sql.Time;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,17 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KcodeQuestion {
 
-    private final ConcurrentHashMap<String, HashMap<Long, String>> logMap;
+    private final HashMap<String, HashMap<Long, String>> logMap;
     private final ArrayBlockingQueue<char[]> queue;
     private ArrayBlockingQueue<TimeStampLog> tsqueue;
-    private final ConcurrentHashMap<String,String> runningInfo;
 
 
     public KcodeQuestion() {
-        logMap = new ConcurrentHashMap<>(2<<8);
-        queue = new ArrayBlockingQueue<>(128);
-        tsqueue = new ArrayBlockingQueue<>(1024);
-        runningInfo = new ConcurrentHashMap<>();
+        logMap = new HashMap<>(2<<8);
+        queue = new ArrayBlockingQueue<>(1024);
+        tsqueue = new ArrayBlockingQueue<>(64);
     }
 
     /**
@@ -34,20 +30,16 @@ public class KcodeQuestion {
     public void prepare(InputStream inputStream) throws Exception {
 
         Thread producer = new Thread(new Producer(inputStream, queue));
-        Thread consumer = new Thread(new Consumer(queue, tsqueue, runningInfo));
+        Thread consumer = new Thread(new Consumer(queue, tsqueue));
         Thread logSorter1 = new Thread(new LogSorter(tsqueue, logMap));
-        Thread logSorter2 = new Thread(new LogSorter(tsqueue, logMap));
         producer.start();
         consumer.start();
         logSorter1.start();
-        logSorter2.start();
 
         producer.join();
         consumer.join();
         logSorter1.join();
-        logSorter2.join();
 
-        throw new Exception(runningInfo.get("Consumer"));
     }
 
      /**

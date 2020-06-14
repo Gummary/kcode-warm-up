@@ -10,22 +10,6 @@ public class Consumer implements Runnable{
     private final ArrayBlockingQueue<TimeStampLog> tsQueue;
     private Long currentTimestamp;
     private ArrayList<Log> allLogs;
-    private final ConcurrentHashMap<String, String> runningInfo;
-    private AveragerMeter calResultAM;
-    private AveragerMeter processBlockAM;
-    private long start = -1L;
-
-    public Consumer(ArrayBlockingQueue<char[]> queue,
-                    ArrayBlockingQueue<TimeStampLog> tsqueue,
-                    ConcurrentHashMap<String, String> runningInfo) {
-        this.blockingQueue = queue;
-        tsQueue = tsqueue;
-        currentTimestamp = -1L;
-        allLogs = null;
-        this.runningInfo = runningInfo;
-        calResultAM = new AveragerMeter();
-        processBlockAM = new AveragerMeter();
-    }
 
     public Consumer(ArrayBlockingQueue<char[]> queue,
                     ArrayBlockingQueue<TimeStampLog> tsqueue) {
@@ -33,16 +17,9 @@ public class Consumer implements Runnable{
         tsQueue = tsqueue;
         currentTimestamp = -1L;
         allLogs = null;
-        runningInfo = null;
-        calResultAM = new AveragerMeter();
-        processBlockAM = new AveragerMeter();
     }
 
     private void calculateResult() {
-        if(start != -1L) {
-            calResultAM.Update(System.currentTimeMillis() - start);
-        }
-        start = System.currentTimeMillis();
         try {
             tsQueue.put(new TimeStampLog(allLogs, currentTimestamp));
         } catch (InterruptedException e) {
@@ -53,24 +30,19 @@ public class Consumer implements Runnable{
 
     @Override
     public void run() {
-        start = System.currentTimeMillis();
-
+        char[] data = new char[0];
         while (true) {
-            char[] data = new char[0];
-            try {
-                data = blockingQueue.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            data = blockingQueue.poll();
+            if(data == null){
+                if(Signal.NODATA) {
+                    break;
+                }
+                continue;
             }
-            int dataLength = data.length;
-            if(dataLength < 10){
-                break;
-            }
-
             int startMessageIdx = 0;
             int secondDotIdx = 0;
 
-            for (int i = 0; i < dataLength; i++) {
+            for (int i = 0; i < data.length; i++) {
                 if (data[i] == '\0') {
                     break;
                 } else if (data[i] == '\n') {
@@ -97,8 +69,8 @@ public class Consumer implements Runnable{
             }
         }
         calculateResult();
-        Signal.NODATA = true;
-        this.runningInfo.put("Consumer", "Calculate Period"+calResultAM.getAverage() + "Calculate Total"+calResultAM.getSum());
+        Signal.NOTIMESTAMP = true;
+//        this.runningInfo.put("Consumer", "Calculate Period"+calResultAM.getAverage() + "Calculate Total"+calResultAM.getSum());
 //        this.runningInfo.put("consumer",
 //                        "Calculate Time Avg:"+calResultAM.getAverage() +
 //                        " Calculate Time Sum:" + calResultAM.getSum() +

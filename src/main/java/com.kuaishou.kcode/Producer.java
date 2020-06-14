@@ -58,12 +58,9 @@ public class Producer implements Runnable{
                 if (roundSize >= 0) {
                     System.arraycopy(tmpbuffer, last_index + 1, buffer, 0, roundSize);
                 }
-//                readAM.Update(System.currentTimeMillis() - start);
-//                start = System.currentTimeMillis();
             }
             this.blockingQueue.put(buffer);
-            this.blockingQueue.put(new char[5]);
-//            this.runningInfo.put("producer", "ReadAvg:" + readAM.getAverage() + "ReadSum" + readAM.getSum());
+            Signal.NODATA = true;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
