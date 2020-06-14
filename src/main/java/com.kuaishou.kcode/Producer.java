@@ -12,7 +12,7 @@ public class Producer implements Runnable{
 
     private final ArrayBlockingQueue<char[]> blockingQueue;
     private final BufferedReader bufferedReader;
-    private static final int BUFFERSIZE = 1536;
+    private static final int BUFFERSIZE = 1280;
     private final ConcurrentHashMap<String, String> runningInfo;
     private AveragerMeter readAM;
 
