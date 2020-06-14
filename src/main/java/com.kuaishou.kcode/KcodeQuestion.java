@@ -16,12 +16,14 @@ public class KcodeQuestion {
     private final ConcurrentHashMap<String, HashMap<Long, String>> logMap;
     private final ArrayBlockingQueue<char[]> queue;
     private ArrayBlockingQueue<TimeStampLog> tsqueue;
+    private final ConcurrentHashMap<String,String> runningInfo;
 
 
     public KcodeQuestion() {
         logMap = new ConcurrentHashMap<>(2<<8);
         queue = new ArrayBlockingQueue<>(128);
         tsqueue = new ArrayBlockingQueue<>(1024);
+        runningInfo = new ConcurrentHashMap<>();
     }
 
     /**
@@ -32,7 +34,7 @@ public class KcodeQuestion {
     public void prepare(InputStream inputStream) throws Exception {
 
         Thread producer = new Thread(new Producer(inputStream, queue));
-        Thread consumer = new Thread(new Consumer(queue, tsqueue));
+        Thread consumer = new Thread(new Consumer(queue, tsqueue, runningInfo));
         Thread logSorter1 = new Thread(new LogSorter(tsqueue, logMap));
         Thread logSorter2 = new Thread(new LogSorter(tsqueue, logMap));
         producer.start();
@@ -45,7 +47,7 @@ public class KcodeQuestion {
         logSorter1.join();
         logSorter2.join();
 
-//        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
+        throw new Exception(runningInfo.get("Consumer"));
     }
 
      /**

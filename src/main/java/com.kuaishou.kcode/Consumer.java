@@ -13,7 +13,7 @@ public class Consumer implements Runnable{
     private final ConcurrentHashMap<String, String> runningInfo;
     private AveragerMeter calResultAM;
     private AveragerMeter processBlockAM;
-
+    private long start = -1L;
 
     public Consumer(ArrayBlockingQueue<char[]> queue,
                     ArrayBlockingQueue<TimeStampLog> tsqueue,
@@ -39,6 +39,10 @@ public class Consumer implements Runnable{
     }
 
     private void calculateResult() {
+        if(start != -1L) {
+            calResultAM.Update(System.currentTimeMillis() - start);
+        }
+        start = System.currentTimeMillis();
         try {
             tsQueue.put(new TimeStampLog(allLogs, currentTimestamp));
         } catch (InterruptedException e) {
@@ -49,7 +53,8 @@ public class Consumer implements Runnable{
 
     @Override
     public void run() {
-//        Long start = System.currentTimeMillis();
+        start = System.currentTimeMillis();
+
         while (true) {
             char[] data = new char[0];
             try {
@@ -61,6 +66,7 @@ public class Consumer implements Runnable{
             if(dataLength < 10){
                 break;
             }
+
             int startMessageIdx = 0;
             int secondDotIdx = 0;
 
@@ -92,6 +98,7 @@ public class Consumer implements Runnable{
         }
         calculateResult();
         Signal.NODATA = true;
+        this.runningInfo.put("Consumer", "Calculate Period"+processBlockAM.getAverage() + "Calculate Total"+processBlockAM.getSum());
 //        this.runningInfo.put("consumer",
 //                        "Calculate Time Avg:"+calResultAM.getAverage() +
 //                        " Calculate Time Sum:" + calResultAM.getSum() +
