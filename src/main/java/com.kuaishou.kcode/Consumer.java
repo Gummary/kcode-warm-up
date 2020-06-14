@@ -10,7 +10,6 @@ public class Consumer implements Runnable{
     private final HashMap<String, HashMap<Long, String>> resultMap;
     private Long currentTimestamp;
     private final ArrayDeque<Log> allLogs;
-    private final HashMap<String, Integer> sumMap;
     private final ConcurrentHashMap<String, String> runningInfo;
     private AveragerMeter calResultAM;
     private AveragerMeter processBlockAM;
@@ -22,7 +21,6 @@ public class Consumer implements Runnable{
         resultMap = map;
         currentTimestamp = -1L;
         allLogs = new ArrayDeque<>();
-        sumMap = new HashMap<>();
         this.runningInfo = runningInfo;
         calResultAM = new AveragerMeter();
         processBlockAM = new AveragerMeter();
@@ -34,7 +32,6 @@ public class Consumer implements Runnable{
         resultMap = map;
         currentTimestamp = -1L;
         allLogs = new ArrayDeque<>();
-        sumMap = new HashMap<>();
         runningInfo = null;
         calResultAM = new AveragerMeter();
         processBlockAM = new AveragerMeter();
@@ -80,8 +77,12 @@ public class Consumer implements Runnable{
 
         for (String methodName :
                 map.keySet()) {
-            double sum = (double)sumMap.get(methodName);
             ArrayList<Log> logs = map.get(methodName);
+            double sum = 0;
+            for (Log l:
+                    logs) {
+                sum += l.getResponseTime();
+            }
             logs.sort(Comparator.comparingInt(Log::getResponseTime));
 
             int qps = logs.size();
@@ -135,10 +136,7 @@ public class Consumer implements Runnable{
                     if (!currentTimestamp.equals(timestamp)) {
                         calculateResult();
                         currentTimestamp = timestamp;
-                        sumMap.replaceAll((k, v)->0);
                     }
-                    int sum = sumMap.getOrDefault(methodName, 0);
-                    sumMap.put(methodName, sum+responseTime);
                     allLogs.push(log);
 
                     startMessageIdx = i + 1;

@@ -27,7 +27,7 @@ public class KcodeQuestion {
 
 
         ConcurrentHashMap<String, String> runningInfo = new ConcurrentHashMap<>();
-        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(2<<10);
+        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(2<<11);
         Thread producer = new Thread(new Producer(inputStream, queue, runningInfo));
         Thread consumer = new Thread(new Consumer(queue, logMap, runningInfo));
         producer.start();
