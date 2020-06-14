@@ -1,6 +1,8 @@
 package com.kuaishou.kcode;
 
 import java.io.*;
+import java.sql.Time;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,10 +14,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KcodeQuestion {
 
     private final HashMap<String, HashMap<Long, String>> logMap;
+    private final ArrayBlockingQueue<char[]> queue;
+    private ArrayBlockingQueue<TimeStampLog> tsqueue;
 
 
     public KcodeQuestion() {
         logMap = new HashMap<>(2<<7);
+        queue = new ArrayBlockingQueue<>(128);
+        tsqueue = new ArrayBlockingQueue<>(1024);
     }
 
     /**
@@ -25,24 +31,18 @@ public class KcodeQuestion {
      */
     public void prepare(InputStream inputStream) throws Exception {
 
-
-        ConcurrentHashMap<String, String> runningInfo = new ConcurrentHashMap<>();
-        ArrayBlockingQueue<char[]> queue = new ArrayBlockingQueue<>(2<<11);
-        Thread producer = new Thread(new Producer(inputStream, queue, runningInfo));
-        Thread consumer = new Thread(new Consumer(queue, logMap, runningInfo));
+        Thread producer = new Thread(new Producer(inputStream, queue));
+        Thread consumer = new Thread(new Consumer(queue, tsqueue));
+        Thread logSorted = new Thread(new LogSorter(tsqueue, logMap));
         producer.start();
         consumer.start();
+        logSorted.start();
 
         producer.join();
         consumer.join();
+        logSorted.join();
 
 //        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
-
-//        for (Map.Entry<String, HashMap<Long, ArrayList<Integer>>> entry:
-//        this.logMap.entrySet()){
-//            System.out.println(entry.getKey().length());
-//        }
-//        System.out.println(this.logMap.size());
     }
 
      /**

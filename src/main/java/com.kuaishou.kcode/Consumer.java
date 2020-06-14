@@ -7,96 +7,45 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Consumer implements Runnable{
 
     private final ArrayBlockingQueue<char []> blockingQueue;
-    private final HashMap<String, HashMap<Long, String>> resultMap;
+    private final ArrayBlockingQueue<TimeStampLog> tsQueue;
     private Long currentTimestamp;
-    private final ArrayDeque<Log> allLogs;
+    private ArrayList<Log> allLogs;
     private final ConcurrentHashMap<String, String> runningInfo;
     private AveragerMeter calResultAM;
     private AveragerMeter processBlockAM;
 
+
     public Consumer(ArrayBlockingQueue<char[]> queue,
-                    HashMap<String, HashMap<Long, String>> map,
+                    ArrayBlockingQueue<TimeStampLog> tsqueue,
                     ConcurrentHashMap<String, String> runningInfo) {
         this.blockingQueue = queue;
-        resultMap = map;
+        tsQueue = tsqueue;
         currentTimestamp = -1L;
-        allLogs = new ArrayDeque<>();
+        allLogs = null;
         this.runningInfo = runningInfo;
         calResultAM = new AveragerMeter();
         processBlockAM = new AveragerMeter();
     }
 
     public Consumer(ArrayBlockingQueue<char[]> queue,
-                    HashMap<String, HashMap<Long, String>> map) {
+                    ArrayBlockingQueue<TimeStampLog> tsqueue) {
         this.blockingQueue = queue;
-        resultMap = map;
+        tsQueue = tsqueue;
         currentTimestamp = -1L;
-        allLogs = new ArrayDeque<>();
+        allLogs = null;
         runningInfo = null;
         calResultAM = new AveragerMeter();
         processBlockAM = new AveragerMeter();
     }
 
-
-    private int binarySearch(ArrayList<Integer> list, Integer value) {
-        int low = 0;
-        int high = list.size() - 1;
-
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            Integer midVal = list.get(mid);
-            int cmp = midVal.compareTo(value);
-            if (cmp < 0) {
-                low = mid + 1;
-            } else if (cmp > 0) {
-                high = mid - 1;
-            } else {
-                return mid;
-            }
-        }
-        return low;
-    }
-
     private void calculateResult() {
-        if(currentTimestamp.equals(-1L)){
-            return;
+        try {
+            tsQueue.put(new TimeStampLog(allLogs, currentTimestamp));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-//        long start = System.currentTimeMillis();
-        HashMap<String, ArrayList<Log>> map = new HashMap<>();
-        while(!allLogs.isEmpty()) {
-            Log log = allLogs.pop();
-            if(map.containsKey(log.getMethodName())) {
-                ArrayList<Log> logs = map.get(log.getMethodName());
-                logs.add(log);
-            } else {
-                ArrayList<Log> logs = new ArrayList<>();
-                logs.add(log);
-                map.put(log.getMethodName(), logs);
-            }
-        }
-
-        for (String methodName :
-                map.keySet()) {
-            ArrayList<Log> logs = map.get(methodName);
-            double sum = logs.stream().mapToDouble(Log::getResponseTime).sum();
-
-            logs.sort(Comparator.comparingInt(Log::getResponseTime));
-
-            int qps = logs.size();
-            int p99_idx = (int) Math.ceil((double)logs.size()*0.99)-1;
-            int p50_idx = (int)Math.ceil((double)logs.size()*0.5)-1;
-            int p99 = logs.get(p99_idx).getResponseTime();
-            int p50 = logs.get(p50_idx).getResponseTime();
-            int avg = (int) Math.ceil(sum / (double) logs.size());
-            int max = logs.get(logs.size()-1).getResponseTime();
-
-            String result = String.valueOf(qps) + ',' + p99 + ',' + p50 + ',' + avg + ',' + max;
-            HashMap<Long, String> methodQPSMap = resultMap.getOrDefault(methodName, new HashMap<>(4200));
-            methodQPSMap.put(currentTimestamp, result);
-            resultMap.put(methodName, methodQPSMap);
-        }
-//        calResultAM.Update(System.currentTimeMillis() - start);
     }
+
 
     @Override
     public void run() {
@@ -133,21 +82,22 @@ public class Consumer implements Runnable{
                     if (!currentTimestamp.equals(timestamp)) {
                         calculateResult();
                         currentTimestamp = timestamp;
+                        allLogs = new ArrayList<>();
                     }
-                    allLogs.push(log);
+                    allLogs.add(log);
 
                     startMessageIdx = i + 1;
                 }
             }
-//            processBlockAM.Update(System.currentTimeMillis() - start);
-//            start = System.currentTimeMillis();
         }
-        this.runningInfo.put("consumer",
-                        "Calculate Time Avg:"+calResultAM.getAverage() +
-                        " Calculate Time Sum:" + calResultAM.getSum() +
-                        " Process Time Avg:" + processBlockAM.getAverage() +
-                        " Process Time sum:" + processBlockAM.getSum()
-                );
+        calculateResult();
+        Signal.NODATA = true;
+//        this.runningInfo.put("consumer",
+//                        "Calculate Time Avg:"+calResultAM.getAverage() +
+//                        " Calculate Time Sum:" + calResultAM.getSum() +
+//                        " Process Time Avg:" + processBlockAM.getAverage() +
+//                        " Process Time sum:" + processBlockAM.getSum()
+//                );
 
     }
 }

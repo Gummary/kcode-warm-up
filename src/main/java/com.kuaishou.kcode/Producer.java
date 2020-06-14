@@ -63,7 +63,7 @@ public class Producer implements Runnable{
             }
             this.blockingQueue.put(buffer);
             this.blockingQueue.put(new char[5]);
-            this.runningInfo.put("producer", "ReadAvg:" + readAM.getAverage() + "ReadSum" + readAM.getSum());
+//            this.runningInfo.put("producer", "ReadAvg:" + readAM.getAverage() + "ReadSum" + readAM.getSum());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
