@@ -1,17 +1,17 @@
 package com.kuaishou.kcode;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LogSorter implements Runnable{
 
     private final ArrayBlockingQueue<TimeStampLog> timeStampLogArrayBlockingQueue;
-    private final HashMap<String, HashMap<Long, String>> resultMap;
+    private final ConcurrentHashMap<String, HashMap<Long, String>> resultMap;
 
-    public LogSorter(ArrayBlockingQueue<TimeStampLog> queue, HashMap<String, HashMap<Long, String>> results) {
+    public LogSorter(ArrayBlockingQueue<TimeStampLog> queue, ConcurrentHashMap<String, HashMap<Long, String>> results) {
         timeStampLogArrayBlockingQueue = queue;
         resultMap = results;
     }
@@ -60,11 +60,14 @@ public class LogSorter implements Runnable{
                     int max = logs.get(logs.size()-1).getResponseTime();
 
                     String result = String.valueOf(qps) + ',' + p99 + ',' + p50 + ',' + avg + ',' + max;
-                    HashMap<Long, String> methodQPSMap = resultMap.getOrDefault(methodName, new HashMap<>(4200));
-                    methodQPSMap.put(currentTimestamp, result);
-                    resultMap.put(methodName, methodQPSMap);
+                    resultMap.compute(methodName, (key ,value)-> {
+                        if(value == null) {
+                            value = new HashMap<>(4200);
+                        }
+                        value.put(currentTimestamp, result);
+                        return value;
+                    });
                 }
-
             }
         }
     }

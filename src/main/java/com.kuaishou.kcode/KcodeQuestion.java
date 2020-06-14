@@ -13,13 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KcodeQuestion {
 
-    private final HashMap<String, HashMap<Long, String>> logMap;
+    private final ConcurrentHashMap<String, HashMap<Long, String>> logMap;
     private final ArrayBlockingQueue<char[]> queue;
     private ArrayBlockingQueue<TimeStampLog> tsqueue;
 
 
     public KcodeQuestion() {
-        logMap = new HashMap<>(2<<7);
+        logMap = new ConcurrentHashMap<>(2<<8);
         queue = new ArrayBlockingQueue<>(128);
         tsqueue = new ArrayBlockingQueue<>(1024);
     }
@@ -33,14 +33,17 @@ public class KcodeQuestion {
 
         Thread producer = new Thread(new Producer(inputStream, queue));
         Thread consumer = new Thread(new Consumer(queue, tsqueue));
-        Thread logSorted = new Thread(new LogSorter(tsqueue, logMap));
+        Thread logSorter1 = new Thread(new LogSorter(tsqueue, logMap));
+        Thread logSorter2 = new Thread(new LogSorter(tsqueue, logMap));
         producer.start();
         consumer.start();
-        logSorted.start();
+        logSorter1.start();
+        logSorter2.start();
 
         producer.join();
         consumer.join();
-        logSorted.join();
+        logSorter1.join();
+        logSorter2.join();
 
 //        throw new Exception(runningInfo.get("consumer") + runningInfo.get("producer"));
     }
